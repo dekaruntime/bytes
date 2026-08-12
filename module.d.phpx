@@ -1,7 +1,87 @@
+/// docid: phpx/bytes/from_string()
+/// <Function name="from_string">
+///   <Description>PHPX standard module function `from_string` from `bytes`.</Description>
+///   <Parameter name="$value" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $value.
+///   </Parameter>
+///   <ReturnType type="string" typeLink="/docs/php/types/string" />
+/// </Function>
 export function from_string($value: string): string
+
+/// docid: phpx/bytes/to_string()
+/// <Function name="to_string">
+///   <Description>PHPX standard module function `to_string` from `bytes`.</Description>
+///   <Parameter name="$value" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $value.
+///   </Parameter>
+///   <ReturnType type="string" typeLink="/docs/php/types/string" />
+/// </Function>
 export function to_string($value: string): string
+
+/// docid: phpx/bytes/len()
+/// <Function name="len">
+///   <Description>PHPX standard module function `len` from `bytes`.</Description>
+///   <Parameter name="$value" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $value.
+///   </Parameter>
+///   <ReturnType type="int" typeLink="/docs/php/types/int" />
+/// </Function>
 export function len($value: string): int
+
+/// docid: phpx/bytes/get()
+/// <Function name="get">
+///   <Description>PHPX standard module function `get` from `bytes`.</Description>
+///   <Parameter name="$value" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $value.
+///   </Parameter>
+///   <Parameter name="$index" type="int" required="true" typeLink="/docs/php/types/int">
+///     Parameter $index.
+///   </Parameter>
+///   <ReturnType type="int|null" />
+/// </Function>
 export function get($value: string, $index: int): int|null
+
+/// docid: phpx/bytes/set()
+/// <Function name="set">
+///   <Description>PHPX standard module function `set` from `bytes`.</Description>
+///   <Parameter name="$value" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $value.
+///   </Parameter>
+///   <Parameter name="$index" type="int" required="true" typeLink="/docs/php/types/int">
+///     Parameter $index.
+///   </Parameter>
+///   <Parameter name="$byte" type="int" required="true" typeLink="/docs/php/types/int">
+///     Parameter $byte.
+///   </Parameter>
+///   <ReturnType type="string" typeLink="/docs/php/types/string" />
+/// </Function>
 export function set($value: string, $index: int, $byte: int): string
+
+/// docid: phpx/bytes/slice()
+/// <Function name="slice">
+///   <Description>PHPX standard module function `slice` from `bytes`.</Description>
+///   <Parameter name="$value" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $value.
+///   </Parameter>
+///   <Parameter name="$start" type="int" required="true" typeLink="/docs/php/types/int">
+///     Parameter $start.
+///   </Parameter>
+///   <Parameter name="$length" type="int|null" required="false">
+///     Parameter $length.
+///   </Parameter>
+///   <ReturnType type="string" typeLink="/docs/php/types/string" />
+/// </Function>
 export function slice($value: string, $start: int, $length: int|null = null): string
+
+/// docid: phpx/bytes/concat()
+/// <Function name="concat">
+///   <Description>PHPX standard module function `concat` from `bytes`.</Description>
+///   <Parameter name="$a" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $a.
+///   </Parameter>
+///   <Parameter name="$b" type="string" required="true" typeLink="/docs/php/types/string">
+///     Parameter $b.
+///   </Parameter>
+///   <ReturnType type="string" typeLink="/docs/php/types/string" />
+/// </Function>
 export function concat($a: string, $b: string): string
