@@ -1,0 +1,16 @@
+import { from_string, to_string, len, get, slice, concat, from_array, to_hex, from_hex, to_base64, from_base64 } from "../index.ds"
+
+console.log(len(from_string("hello")));
+console.log(to_string(from_string("hello")));
+console.log(get(from_string("hello"), 1));
+console.log(to_string(slice(from_string("hello"), 3)));
+console.log(to_string(concat(from_string("hel"), from_string("lo"))));
+console.log(to_hex(from_string("hi")));
+console.log(to_string(from_hex("6869")));
+console.log(to_base64(from_string("hi")));
+console.log(to_string(from_base64("aGk=")));
+let values = [255, 0, 128];
+let buf = from_array(values);
+console.log(len(buf));
+console.log(get(buf, 0));
+console.log(get(buf, 2));
