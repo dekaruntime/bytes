@@ -1,0 +1,147 @@
+// Uint8Array-backed bytes. Bind results with `let`, not `const`:
+// Deka freezes const values, and JS cannot freeze typed arrays.
+
+export fn from_string(value: string): bytes {
+  let r = unsafe { new TextEncoder().encode(value) };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.from_string failed")
+  };
+}
+
+export fn to_string_lossy(value: bytes): string {
+  let r = unsafe { new TextDecoder("utf-8", { fatal: false }).decode(value) };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.to_string_lossy failed")
+  };
+}
+
+export fn to_string(value: bytes): string {
+  return to_string_lossy(value);
+}
+
+export fn len(value: bytes): number {
+  let r = unsafe { value.byteLength };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.len failed")
+  };
+}
+
+export fn get(value: bytes, index: number): number {
+  let r = unsafe { index >= 0 && index < value.byteLength ? value[index] : -1 };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.get failed")
+  };
+}
+
+export fn slice(value: bytes, start: number): bytes {
+  let r = unsafe { value.slice(start) };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.slice failed")
+  };
+}
+
+export fn concat(a: bytes, b: bytes): bytes {
+  let sized = unsafe { new Uint8Array(a.byteLength + b.byteLength) };
+  let out = match (sized) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.concat alloc failed")
+  };
+  let _a = unsafe { out.set(a, 0) };
+  let _b = unsafe { out.set(b, a.byteLength) };
+  return out;
+}
+
+export fn from_array(values: object): bytes {
+  let r = unsafe { Uint8Array.from(values) };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.from_array failed")
+  };
+}
+
+export fn to_hex(value: bytes): string {
+  let r = unsafe {
+    var s = "";
+    var i = 0;
+    for (i = 0; i < value.byteLength; i++) {
+      var hex = value[i].toString(16);
+      s += hex.length < 2 ? "0" + hex : hex;
+    }
+    return s;
+  };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.to_hex failed")
+  };
+}
+
+export fn from_hex(value: string): bytes {
+  let r = unsafe {
+    var clean = String(value);
+    var n = Math.floor(clean.length / 2);
+    var out = new Uint8Array(n);
+    var i = 0;
+    for (i = 0; i < n; i++) {
+      out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+    }
+    return out;
+  };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.from_hex failed")
+  };
+}
+
+export fn to_base64(value: bytes): string {
+  let r = unsafe {
+    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var s = "";
+    var i = 0;
+    var n = value.byteLength;
+    for (i = 0; i < n; i += 3) {
+      var b0 = value[i];
+      var b1 = i + 1 < n ? value[i + 1] : 0;
+      var b2 = i + 2 < n ? value[i + 2] : 0;
+      var triple = (b0 << 16) + (b1 << 8) + b2;
+      s += alphabet[(triple >> 18) & 63];
+      s += alphabet[(triple >> 12) & 63];
+      s += i + 1 < n ? alphabet[(triple >> 6) & 63] : "=";
+      s += i + 2 < n ? alphabet[triple & 63] : "=";
+    }
+    return s;
+  };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.to_base64 failed")
+  };
+}
+
+export fn from_base64(value: string): bytes {
+  let r = unsafe {
+    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var clean = String(value).replace(/=+$/, "");
+    var n = clean.length;
+    var out = [];
+    var i = 0;
+    for (i = 0; i < n; i += 4) {
+      var c0 = alphabet.indexOf(clean[i]);
+      var c1 = alphabet.indexOf(clean[i + 1]);
+      var c2 = i + 2 < n ? alphabet.indexOf(clean[i + 2]) : 0;
+      var c3 = i + 3 < n ? alphabet.indexOf(clean[i + 3]) : 0;
+      var triple = (c0 << 18) + (c1 << 12) + (c2 << 6) + c3;
+      out.push((triple >> 16) & 255);
+      if (i + 2 < n) out.push((triple >> 8) & 255);
+      if (i + 3 < n) out.push(triple & 255);
+    }
+    return new Uint8Array(out);
+  };
+  return match (r) {
+    Ok(v) => v,
+    Err(e) => panic("bytes.from_base64 failed")
+  };
+}
