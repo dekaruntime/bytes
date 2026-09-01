@@ -2,7 +2,7 @@
 // Deka freezes const values, and JS cannot freeze typed arrays.
 
 fn empty_bytes(): bytes {
-  let r = unsafe { return new Uint8Array(0); };
+  let r = unsafe<bytes> { return new Uint8Array(0); };
   return match (r) {
     Ok(v) => v,
     Err(e) => empty_bytes()
@@ -21,21 +21,21 @@ fn abort_bytes(msg: string): bytes {
 }
 
 fn abort_string(msg: string): string {
-  return match (unsafe { throw new Error(msg); }) {
+  return match (unsafe<void> { throw new Error(msg); }) {
     Ok(v) => "",
     Err(e) => ""
   };
 }
 
 fn abort_number(msg: string): number {
-  return match (unsafe { throw new Error(msg); }) {
+  return match (unsafe<void> { throw new Error(msg); }) {
     Ok(v) => 0,
     Err(e) => 0
   };
 }
 
 export fn from_string(value: string): bytes {
-  let r = unsafe { new TextEncoder().encode(value) };
+  let r = unsafe<bytes> { new TextEncoder().encode(value) };
   return match (r) {
     Ok(v) => v,
     Err(e) => abort_bytes("bytes.from_string failed")
@@ -55,7 +55,7 @@ export fn to_string(value: bytes): string {
 }
 
 export fn len(value: bytes): number {
-  let r = unsafe { value.byteLength };
+  let r = unsafe<number> { value.byteLength };
   return match (r) {
     Ok(v) => v,
     Err(e) => abort_number("bytes.len failed")
@@ -63,7 +63,7 @@ export fn len(value: bytes): number {
 }
 
 export fn get(value: bytes, index: number): number {
-  let r = unsafe { index >= 0 && index < value.byteLength ? value[index] : -1 };
+  let r = unsafe<number> { index >= 0 && index < value.byteLength ? value[index] : -1 };
   return match (r) {
     Ok(v) => v,
     Err(e) => abort_number("bytes.get failed")
@@ -71,7 +71,7 @@ export fn get(value: bytes, index: number): number {
 }
 
 export fn slice(value: bytes, start: number): bytes {
-  let r = unsafe { value.slice(start) };
+  let r = unsafe<bytes> { value.slice(start) };
   return match (r) {
     Ok(v) => v,
     Err(e) => abort_bytes("bytes.slice failed")
@@ -79,18 +79,18 @@ export fn slice(value: bytes, start: number): bytes {
 }
 
 export fn concat(a: bytes, b: bytes): bytes {
-  let sized = unsafe { new Uint8Array(a.byteLength + b.byteLength) };
+  let sized = unsafe<bytes> { new Uint8Array(a.byteLength + b.byteLength) };
   let out = match (sized) {
     Ok(v) => v,
     Err(e) => abort_bytes("bytes.concat alloc failed")
   };
-  let _a = unsafe { out.set(a, 0) };
-  let _b = unsafe { out.set(b, a.byteLength) };
+  let _a = unsafe<void> { out.set(a, 0) };
+  let _b = unsafe<void> { out.set(b, a.byteLength) };
   return out;
 }
 
 export fn from_array(values: Array<number>): bytes {
-  let r = unsafe { Uint8Array.from(values) };
+  let r = unsafe<bytes> { Uint8Array.from(values) };
   return match (r) {
     Ok(v) => v,
     Err(e) => abort_bytes("bytes.from_array failed")
