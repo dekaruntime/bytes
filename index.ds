@@ -1,7 +1,7 @@
 // Uint8Array-backed bytes. Bind results with `let`, not `const`:
 // Deka freezes const values, and JS cannot freeze typed arrays.
 
-fn empty_bytes(): bytes {
+fn empty_bytes() bytes {
   let r = unsafe<bytes> { return new Uint8Array(0); };
   return match (r) {
     Ok(v) => v,
@@ -9,7 +9,7 @@ fn empty_bytes(): bytes {
   };
 }
 
-fn abort_bytes(msg: string): bytes {
+fn abort_bytes(msg: string) bytes {
   let r = unsafe {
     throw new Error(msg);
     return new Uint8Array(0);
@@ -20,21 +20,21 @@ fn abort_bytes(msg: string): bytes {
   };
 }
 
-fn abort_string(msg: string): string {
+fn abort_string(msg: string) string {
   return match (unsafe<void> { throw new Error(msg); }) {
     Ok(v) => "",
     Err(e) => ""
   };
 }
 
-fn abort_number(msg: string): number {
+fn abort_number(msg: string) number {
   return match (unsafe<void> { throw new Error(msg); }) {
     Ok(v) => 0,
     Err(e) => 0
   };
 }
 
-export fn from_string(value: string): bytes {
+export fn from_string(value: string) bytes {
   let r = unsafe<bytes> { new TextEncoder().encode(value) };
   return match (r) {
     Ok(v) => v,
@@ -42,7 +42,7 @@ export fn from_string(value: string): bytes {
   };
 }
 
-export fn to_string_lossy(value: bytes): string {
+export fn to_string_lossy(value: bytes) string {
   let r = unsafe { new TextDecoder("utf-8", { fatal: false }).decode(value) };
   return match (r) {
     Ok(v) => v,
@@ -50,11 +50,11 @@ export fn to_string_lossy(value: bytes): string {
   };
 }
 
-export fn to_string(value: bytes): string {
+export fn to_string(value: bytes) string {
   return to_string_lossy(value);
 }
 
-export fn len(value: bytes): number {
+export fn len(value: bytes) number {
   let r = unsafe<number> { value.byteLength };
   return match (r) {
     Ok(v) => v,
@@ -62,7 +62,7 @@ export fn len(value: bytes): number {
   };
 }
 
-export fn get(value: bytes, index: number): number {
+export fn get(value: bytes, index: number) number {
   let r = unsafe<number> { index >= 0 && index < value.byteLength ? value[index] : -1 };
   return match (r) {
     Ok(v) => v,
@@ -70,7 +70,7 @@ export fn get(value: bytes, index: number): number {
   };
 }
 
-export fn slice(value: bytes, start: number): bytes {
+export fn slice(value: bytes, start: number) bytes {
   let r = unsafe<bytes> { value.slice(start) };
   return match (r) {
     Ok(v) => v,
@@ -78,7 +78,7 @@ export fn slice(value: bytes, start: number): bytes {
   };
 }
 
-export fn concat(a: bytes, b: bytes): bytes {
+export fn concat(a: bytes, b: bytes) bytes {
   let sized = unsafe<bytes> { new Uint8Array(a.byteLength + b.byteLength) };
   let out = match (sized) {
     Ok(v) => v,
@@ -89,7 +89,7 @@ export fn concat(a: bytes, b: bytes): bytes {
   return out;
 }
 
-export fn from_array(values: Array<number>): bytes {
+export fn from_array(values: Array<number>) bytes {
   let r = unsafe<bytes> { Uint8Array.from(values) };
   return match (r) {
     Ok(v) => v,
@@ -97,7 +97,7 @@ export fn from_array(values: Array<number>): bytes {
   };
 }
 
-export fn to_hex(value: bytes): string {
+export fn to_hex(value: bytes) string {
   let r = unsafe {
     var s = "";
     var i = 0;
@@ -113,7 +113,7 @@ export fn to_hex(value: bytes): string {
   };
 }
 
-export fn from_hex(value: string): bytes {
+export fn from_hex(value: string) bytes {
   let r = unsafe {
     var clean = String(value);
     var n = Math.floor(clean.length / 2);
@@ -130,7 +130,7 @@ export fn from_hex(value: string): bytes {
   };
 }
 
-export fn to_base64(value: bytes): string {
+export fn to_base64(value: bytes) string {
   let r = unsafe {
     var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     var s = "";
@@ -154,7 +154,7 @@ export fn to_base64(value: bytes): string {
   };
 }
 
-export fn from_base64(value: string): bytes {
+export fn from_base64(value: string) bytes {
   let r = unsafe {
     var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     var clean = String(value).replace(/=+$/, "");
