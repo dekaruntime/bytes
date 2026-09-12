@@ -22,14 +22,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install deka CLI
+      - name: Install deka + dsc CLIs
         run: |
           VERSION="$(curl -sSf https://releases.deka.gg/latest.json | sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' | head -1)"
           curl -sSfL "https://releases.deka.gg/${VERSION}/deka-darwin-arm64" -o /tmp/deka
           chmod +x /tmp/deka
+          # deka check shells out to dsc since the toolchain split; same lockstep version
+          curl -sSfL "https://github.com/dekaruntime/dsc/releases/download/v${VERSION}/dsc-darwin-arm64" -o /tmp/dsc
+          chmod +x /tmp/dsc
 
       - name: Verify package as an installed consumer
-        run: /tmp/deka check --as-package .
+        run: DEKA_DSC=/tmp/dsc /tmp/deka check --as-package .
 
       - name: Build tarball
         run: |
