@@ -1,180 +1,57 @@
 // Uint8Array-backed bytes. Bind results with `let`, not `const`:
 // Deka freezes const values, and JS cannot freeze typed arrays.
-
-fn empty_bytes() bytes {
-  let r = unsafe<bytes> { return new Uint8Array(0); };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => empty_bytes()
-  };
-}
-
-fn abort_bytes(msg: string) bytes {
-  let r = unsafe {
-    throw new Error(msg);
-    return new Uint8Array(0);
-  };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => empty_bytes()
-  };
-}
-
-fn abort_string(msg: string) string {
-  return match (unsafe<void> { throw new Error(msg); }) {
-    Ok(v) => "",
-    Err(e) => ""
-  };
-}
-
-fn abort_number(msg: string) number {
-  return match (unsafe<void> { throw new Error(msg); }) {
-    Ok(v) => 0,
-    Err(e) => 0
-  };
-}
+//
+// rfd#39 / deka#913: host ops are summoned. Encoder/decoder/slice/concat/from
+// and the hex/base64 encoders are `total`. `from_hex` / `from_base64` use the
+// Exception channel for invalid input (rfd#62). Abort helpers that existed
+// only to turn `throw` into `unsafe` Err are gone — totals do not fail, and
+// decode failures raise.
+summon { total encode_utf8(value: string): bytes, total decode_utf8(value: bytes): string, total slice_from(value: bytes, start: number): bytes, total concat_bytes(a: bytes, b: bytes): bytes, total from_numbers(values: Array<number>): bytes, total encode_hex(value: bytes): string, from_hex_bytes(value: string): Exception<bytes, JsError>, total encode_base64(value: bytes): string, from_base64_bytes(value: string): Exception<bytes, JsError> } from "./shim.mjs"
 
 export fn from_string(value: string) bytes {
-  let r = unsafe<bytes> { new TextEncoder().encode(value) };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_bytes("bytes.from_string failed")
-  };
+  return encode_utf8(value)
 }
 
 export fn to_string_lossy(value: bytes) string {
-  let r = unsafe { new TextDecoder("utf-8", { fatal: false }).decode(value) };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_string("bytes.to_string_lossy failed")
-  };
+  return decode_utf8(value)
 }
 
 export fn to_string(value: bytes) string {
-  return to_string_lossy(value);
+  return to_string_lossy(value)
 }
 
 export fn len(value: bytes) number {
-  let r = unsafe<number> { value.byteLength };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_number("bytes.len failed")
-  };
+  return value.length
 }
 
 export fn get(value: bytes, index: number) number {
-  let r = unsafe<number> { index >= 0 && index < value.byteLength ? value[index] : -1 };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_number("bytes.get failed")
-  };
+  return index >= 0 && index < value.length ? value[index] : -1
 }
 
 export fn slice(value: bytes, start: number) bytes {
-  let r = unsafe<bytes> { value.slice(start) };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_bytes("bytes.slice failed")
-  };
+  return slice_from(value, start)
 }
 
 export fn concat(a: bytes, b: bytes) bytes {
-  let sized = unsafe<bytes> { new Uint8Array(a.byteLength + b.byteLength) };
-  let out = match (sized) {
-    Ok(v) => v,
-    Err(e) => abort_bytes("bytes.concat alloc failed")
-  };
-  let _a = unsafe<void> { out.set(a, 0) };
-  let _b = unsafe<void> { out.set(b, a.byteLength) };
-  return out;
+  return concat_bytes(a, b)
 }
 
 export fn from_array(values: Array<number>) bytes {
-  let r = unsafe<bytes> { Uint8Array.from(values) };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_bytes("bytes.from_array failed")
-  };
+  return from_numbers(values)
 }
 
 export fn to_hex(value: bytes) string {
-  let r = unsafe {
-    var s = "";
-    var i = 0;
-    for (i = 0; i < value.byteLength; i++) {
-      var hex = value[i].toString(16);
-      s += hex.length < 2 ? "0" + hex : hex;
-    }
-    return s;
-  };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_string("bytes.to_hex failed")
-  };
+  return encode_hex(value)
 }
 
-export fn from_hex(value: string) bytes {
-  let r = unsafe {
-    var clean = String(value);
-    var n = Math.floor(clean.length / 2);
-    var out = new Uint8Array(n);
-    var i = 0;
-    for (i = 0; i < n; i++) {
-      out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
-    }
-    return out;
-  };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_bytes("bytes.from_hex failed")
-  };
+export fn from_hex(value: string) Exception<bytes, JsError> {
+  return from_hex_bytes(value)
 }
 
 export fn to_base64(value: bytes) string {
-  let r = unsafe {
-    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    var s = "";
-    var i = 0;
-    var n = value.byteLength;
-    for (i = 0; i < n; i += 3) {
-      var b0 = value[i];
-      var b1 = i + 1 < n ? value[i + 1] : 0;
-      var b2 = i + 2 < n ? value[i + 2] : 0;
-      var triple = (b0 << 16) + (b1 << 8) + b2;
-      s += alphabet[(triple >> 18) & 63];
-      s += alphabet[(triple >> 12) & 63];
-      s += i + 1 < n ? alphabet[(triple >> 6) & 63] : "=";
-      s += i + 2 < n ? alphabet[triple & 63] : "=";
-    }
-    return s;
-  };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_string("bytes.to_base64 failed")
-  };
+  return encode_base64(value)
 }
 
-export fn from_base64(value: string) bytes {
-  let r = unsafe {
-    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    var clean = String(value).replace(/=+$/, "");
-    var n = clean.length;
-    var out = [];
-    var i = 0;
-    for (i = 0; i < n; i += 4) {
-      var c0 = alphabet.indexOf(clean[i]);
-      var c1 = alphabet.indexOf(clean[i + 1]);
-      var c2 = i + 2 < n ? alphabet.indexOf(clean[i + 2]) : 0;
-      var c3 = i + 3 < n ? alphabet.indexOf(clean[i + 3]) : 0;
-      var triple = (c0 << 18) + (c1 << 12) + (c2 << 6) + c3;
-      out.push((triple >> 16) & 255);
-      if (i + 2 < n) out.push((triple >> 8) & 255);
-      if (i + 3 < n) out.push(triple & 255);
-    }
-    return new Uint8Array(out);
-  };
-  return match (r) {
-    Ok(v) => v,
-    Err(e) => abort_bytes("bytes.from_base64 failed")
-  };
+export fn from_base64(value: string) Exception<bytes, JsError> {
+  return from_base64_bytes(value)
 }

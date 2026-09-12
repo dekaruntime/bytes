@@ -1,16 +1,42 @@
 import { from_string, to_string, len, get, slice, concat, from_array, to_hex, from_hex, to_base64, from_base64 } from "../index.ds"
 
-console.log(len(from_string("hello")));
-console.log(to_string(from_string("hello")));
-console.log(get(from_string("hello"), 1));
-console.log(to_string(slice(from_string("hello"), 3)));
-console.log(to_string(concat(from_string("hel"), from_string("lo"))));
-console.log(to_hex(from_string("hi")));
-console.log(to_string(from_hex("6869")));
-console.log(to_base64(from_string("hi")));
-console.log(to_string(from_base64("aGk=")));
-let values = [255, 0, 128];
-let buf = from_array(values);
-console.log(len(buf));
-console.log(get(buf, 0));
-console.log(get(buf, 2));
+summon { total log(message: string): void } from "./log.mjs"
+
+log(string(len(from_string("hello"))))
+log(to_string(from_string("hello")))
+log(string(get(from_string("hello"), 1)))
+log(to_string(slice(from_string("hello"), 3)))
+log(to_string(concat(from_string("hel"), from_string("lo"))))
+log(to_hex(from_string("hi")))
+match (from_hex("6869")) {
+  Ok(v) => log(to_string(v)),
+  Throw(e) => panic("from_hex"),
+}
+log(to_base64(from_string("hi")))
+match (from_base64("aGk=")) {
+  Ok(v) => log(to_string(v)),
+  Throw(e) => panic("from_base64"),
+}
+let values = [255, 0, 128]
+let buf = from_array(values)
+log(string(len(buf)))
+log(string(get(buf, 0)))
+log(string(get(buf, 2)))
+log(string(get(from_string("hello"), 99)))
+
+match (from_hex("zz")) {
+  Ok(v) => panic("from_hex accepted invalid"),
+  Throw(e) => log("from_hex-invalid"),
+}
+
+match (from_hex("686")) {
+  Ok(v) => panic("from_hex accepted odd length"),
+  Throw(e) => log("from_hex-odd"),
+}
+
+match (from_base64("!!!!")) {
+  Ok(v) => panic("from_base64 accepted invalid"),
+  Throw(e) => log("from_base64-invalid"),
+}
+
+log("ok")
