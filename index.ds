@@ -6,7 +6,7 @@
 // Exception channel for invalid input (rfd#62). Abort helpers that existed
 // only to turn `throw` into `unsafe` Err are gone — totals do not fail, and
 // decode failures raise.
-summon { total encode_utf8(value: string): bytes, total decode_utf8(value: bytes): string, total slice_from(value: bytes, start: number): bytes, total concat_bytes(a: bytes, b: bytes): bytes, total from_numbers(values: Array<number>): bytes, total encode_hex(value: bytes): string, from_hex_bytes(value: string): Exception<bytes, JsError>, total encode_base64(value: bytes): string, from_base64_bytes(value: string): Exception<bytes, JsError> } from "./shim.mjs"
+summon { total encode_utf8(value: string) bytes, total decode_utf8(value: bytes) string, total slice_from(value: bytes, start: number) bytes, total concat_bytes(a: bytes, b: bytes) bytes, total from_numbers(values: Array<number>) bytes, total encode_hex(value: bytes) string, from_hex_bytes(value: string) Exception<bytes, JsError>, total encode_base64(value: bytes) string, from_base64_bytes(value: string) Exception<bytes, JsError> } from "./shim.mjs"
 
 export fn from_string(value: string) bytes {
   return encode_utf8(value)
