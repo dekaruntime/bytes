@@ -1,6 +1,6 @@
 import { from_string, to_string, len, get, slice, concat, from_array, to_hex, from_hex, to_base64, from_base64 } from "../index.ds"
 
-summon { total log(message: string): void } from "./log.mjs"
+summon { total log(message: string) void } from "./log.mjs"
 
 log(string(len(from_string("hello"))))
 log(to_string(from_string("hello")))
